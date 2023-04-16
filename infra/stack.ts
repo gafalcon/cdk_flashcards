@@ -1,9 +1,8 @@
 import * as cdk from "aws-cdk-lib";
-import { LambdaIntegration, RestApi } from "aws-cdk-lib/aws-apigateway";
+import { LambdaIntegration, RestApi, Cors } from "aws-cdk-lib/aws-apigateway";
 import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-import { Lambda } from "aws-cdk-lib/aws-ses-actions";
-import { Construct, Node } from "constructs";
+import { Construct } from "constructs";
 import { join } from "path";
 
 const DDB_FLASHCARDS_TABLE_NAME = "flashcards";
@@ -13,9 +12,22 @@ export interface SecondaryIndex {
   type: AttributeType;
 }
 export class DevStack extends cdk.Stack {
-  private api = new RestApi(this, "FlashCardsAPI");
+  private api = new RestApi(this, "FlashCardsAPI", {
+    // // 👇 set up CORS
+    // defaultCorsPreflightOptions: {
+    //   allowHeaders: [
+    //     "Content-Type",
+    //     "X-Amz-Date",
+    //     "Authorization",
+    //     "X-Api-Key",
+    //   ],
+    //   allowMethods: ["OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"],
+    //   allowCredentials: true,
+    //   allowOrigins: ["http://localhost:3000", "http://localhost:5173"],
+    // },
+  });
   private flashcardsTable: Table;
-  private answersTable: Table;
+  // private answersTable: Table;
   private readCardsLambdaIntegration: LambdaIntegration;
   private createCardLambdaIntegration: LambdaIntegration;
   private getCardLambdaIntegration: LambdaIntegration;
@@ -106,6 +118,11 @@ export class DevStack extends cdk.Stack {
 
   private setAPIGateway() {
     const flashcardsResource = this.api.root.addResource("flashcards");
+    flashcardsResource.addCorsPreflight({
+      allowOrigins: Cors.ALL_ORIGINS,
+      allowMethods: Cors.ALL_METHODS,
+      allowHeaders: Cors.DEFAULT_HEADERS,
+    });
     flashcardsResource.addMethod("GET", this.readCardsLambdaIntegration);
     flashcardsResource.addMethod("POST", this.createCardLambdaIntegration);
 
@@ -113,6 +130,11 @@ export class DevStack extends cdk.Stack {
     flashCardResource.addMethod("GET", this.getCardLambdaIntegration);
 
     const answerCardResource = flashCardResource.addResource("answer");
-    flashCardResource.addMethod("PATCH", this.answerCardLambdaIntegration);
+    answerCardResource.addCorsPreflight({
+      allowOrigins: Cors.ALL_ORIGINS,
+      allowMethods: Cors.ALL_METHODS,
+      allowHeaders: Cors.DEFAULT_HEADERS,
+    });
+    answerCardResource.addMethod("PATCH", this.answerCardLambdaIntegration);
   }
 }

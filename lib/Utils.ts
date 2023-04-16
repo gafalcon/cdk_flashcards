@@ -1,4 +1,3 @@
-import { Result } from "aws-cdk-lib/aws-stepfunctions";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 
 export function generateRandomId(): string {
@@ -16,9 +15,11 @@ export function addCorsHeader(result: APIGatewayProxyResult) {
     "Access-Control-Allow-Methods": "*",
   };
 }
-export function send(statusCode: number, body: any) {
-  return {
+export function send(statusCode: number, body: any): APIGatewayProxyResult {
+  const result = {
     statusCode,
     body: JSON.stringify(body),
   };
+  addCorsHeader(result);
+  return result;
 }

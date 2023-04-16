@@ -6,6 +6,7 @@ import {
 
 import { ddbDocClient } from "../lib/dynamodb-client";
 import { ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { send } from "../lib/Utils";
 const TABLE_NAME = process.env.TABLE_NAME;
 
 export const handler = async (
@@ -19,14 +20,8 @@ export const handler = async (
       })
     );
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ data: data.Items }),
-    };
+    return send(200, { data: data.Items });
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: (error as Error).message }),
-    };
+    return send(500, { error: (error as Error).message });
   }
 };
