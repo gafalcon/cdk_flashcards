@@ -2,10 +2,12 @@ import * as cdk from "aws-cdk-lib";
 import { LambdaIntegration, RestApi, Cors } from "aws-cdk-lib/aws-apigateway";
 import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import { Bucket } from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 import { join } from "path";
 
 const DDB_FLASHCARDS_TABLE_NAME = "flashcards";
+const BUCKET_WEBSITE_NAME = "gafalcon_flashcards_website";
 
 export interface SecondaryIndex {
   name: string;
@@ -36,7 +38,7 @@ export class DevStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Dynamo Tables
+    // Dynamo Table
     this.flashcardsTable = new Table(this, DDB_FLASHCARDS_TABLE_NAME, {
       partitionKey: {
         name: "id",
@@ -59,8 +61,13 @@ export class DevStack extends cdk.Stack {
         },
       });
     }
+
+    // API
     this.createLambdas();
     this.setAPIGateway();
+
+    // S3 website
+    this.createS3Website(BUCKET_WEBSITE_NAME);
   }
 
   private createLambdas() {
@@ -136,5 +143,15 @@ export class DevStack extends cdk.Stack {
       allowHeaders: Cors.DEFAULT_HEADERS,
     });
     answerCardResource.addMethod("PATCH", this.answerCardLambdaIntegration);
+  }
+
+  private createS3Website(bucketName: string) {
+    const websiteBucket = new Bucket(this, "space-app-web-id", {
+      bucketName: bucketName,
+      publicReadAccess: true,
+      websiteIndexDocument: "index.html",
+    });
+
+    return websiteBucket;
   }
 }
