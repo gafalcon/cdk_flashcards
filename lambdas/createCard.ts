@@ -30,6 +30,8 @@ export const handler = async (
       complete: 0,
       correct_attempts: 0,
       incorrect_attempts: 0,
+      correct_attempts_two_way: 0,
+      incorrect_attempts_two_way: 0,
     };
 
     const data = await ddbDocClient.send(

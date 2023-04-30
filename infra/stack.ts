@@ -2,12 +2,16 @@ import * as cdk from "aws-cdk-lib";
 import { LambdaIntegration, RestApi, Cors } from "aws-cdk-lib/aws-apigateway";
 import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-import { Bucket } from "aws-cdk-lib/aws-s3";
+import {
+  BlockPublicAccess,
+  Bucket,
+  BucketAccessControl,
+} from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 import { join } from "path";
 
 const DDB_FLASHCARDS_TABLE_NAME = "flashcards";
-const BUCKET_WEBSITE_NAME = "gafalcon_flashcards_website";
+const BUCKET_WEBSITE_NAME = "gafalcon-flashcards-s3website";
 
 export interface SecondaryIndex {
   name: string;
@@ -149,6 +153,8 @@ export class DevStack extends cdk.Stack {
     const websiteBucket = new Bucket(this, "space-app-web-id", {
       bucketName: bucketName,
       publicReadAccess: true,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ACLS,
+      accessControl: BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
       websiteIndexDocument: "index.html",
     });
 

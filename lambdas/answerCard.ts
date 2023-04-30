@@ -18,6 +18,10 @@ export const handler = async (
     ? "correct_attempts"
     : "incorrect_attempts";
 
+  if (body.two_way) {
+    answer_field += "_two_way";
+  }
+
   try {
     const res = await ddbDocClient.update({
       TableName: TABLE_NAME,

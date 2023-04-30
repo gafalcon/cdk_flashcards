@@ -7,4 +7,6 @@ export interface FlashCard {
   complete: number;
   correct_attempts: number;
   incorrect_attempts: number;
+  correct_attempts_two_way?: number;
+  incorrect_attempts_two_way?: number;
 }
